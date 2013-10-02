@@ -43,6 +43,7 @@ class AsyncSQSConnection(botornado.connection.AsyncAWSQueryConnection, SQSConnec
                                                self.DefaultRegionEndpoint, connection_cls=self.__class__)
         self.region = region
         botornado.connection.AsyncAWSQueryConnection.__init__(self, host=self.region.endpoint, **kwargs)
+        self.auth_region_name = self.region.name
 
     def create_queue(self, queue_name, visibility_timeout=None, callback=None):
         """

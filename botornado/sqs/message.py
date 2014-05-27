@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -28,7 +28,7 @@ Message are here:
     http://docs.amazonwebservices.com/AWSSimpleQueueService/2008-01-01/SQSDeveloperGuide/Query_QuerySendMessage.html
 
 So, at it's simplest level a Message just needs to allow a developer to store bytes in it and get the bytes
-back out.  However, to allow messages to have richer semantics, the Message class must support the 
+back out.  However, to allow messages to have richer semantics, the Message class must support the
 following interfaces:
 
 The constructor for the Message class must accept a keyword parameter "queue" which is an instance of a
@@ -70,16 +70,21 @@ from boto.exception import SQSDecodeError
 
 from boto.sqs.message import *
 
-class _AsyncMessage:
-    def delete(self, callback=None):
-        if self.queue:
-            return self.queue.delete_message(self, callback=callback)
+import tornado.gen
 
-    def change_visibility(self, visibility_timeout, callback=None):
+class _AsyncMessage(object):
+    @tornado.gen.coroutine
+    def delete(self):
         if self.queue:
-            self.queue.connection.change_message_visibility(self.queue,
+            result = yield self.queue.delete_message(self)
+            raise tornado.gen.Return(result)
+
+    @tornado.gen.coroutine
+    def change_visibility(self, visibility_timeout):
+        if self.queue:
+            yield self.queue.connection.change_message_visibility(self.queue,
                                                             self.receipt_handle,
-                                                            visibility_timeout, callback=callback)
+                                                            visibility_timeout)
 
 class AsyncRawMessage(_AsyncMessage, RawMessage):
     """
@@ -88,23 +93,14 @@ class AsyncRawMessage(_AsyncMessage, RawMessage):
     will be written to SQS and whatever is returned from SQS is stored
     directly into the body of the message.
     """
-    def delete(self, callback=None):
-        if self.queue:
-            return self.queue.delete_message(self, callback=callback)
 
-    def change_visibility(self, visibility_timeout, callback=None):
-        if self.queue:
-            self.queue.connection.change_message_visibility(self.queue,
-                                                            self.receipt_handle,
-                                                            visibility_timeout, callback=callback)
-     
 class AsyncMessage(_AsyncMessage, Message):
     """
     The default Message class used for SQS queues.  This class automatically
     encodes/decodes the message body using Base64 encoding to avoid any
     illegal characters in the message body.  See:
 
-    http://developer.amazonwebservices.com/connect/thread.jspa?messageID=49680%EC%88%90
+    https://forums.aws.amazon.com/thread.jspa?threadID=13067
 
     for details on why this is a good idea.  The encode/decode is meant to
     be transparent to the end-user.

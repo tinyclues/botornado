@@ -76,7 +76,7 @@ class AsyncSQSConnection(botornado.connection.AsyncAWSQueryConnection, SQSConnec
         if visibility_timeout:
             params['Attribute.1.Name'] = 'VisibilityTimeout'
             params['Attribute.1.Value'] = int(visibility_timeout)
-        result = yield Task(self.get_object, 'CreateQueue', params, botornado.sqs.queue.AsyncQueue)
+        result = yield tornado.gen.Task(self.get_object, 'CreateQueue', params, botornado.sqs.queue.AsyncQueue)
         raise tornado.gen.Return(result)
 
     @tornado.gen.coroutine

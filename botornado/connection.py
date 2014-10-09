@@ -63,6 +63,9 @@ import boto.utils
 import boto.handler
 import boto.cacerts
 
+from urlparse import urlunsplit
+
+
 from boto import config, UserAgent
 from boto.exception import AWSConnectionError, BotoClientError, BotoServerError
 from boto.provider import Provider
@@ -110,7 +113,7 @@ class AsyncHTTPConnection(object):
             host = "%s:%d" % (self.host, self.port)
         else:
             host = self.host
-        url = urlparse.urlunsplit((scheme, host, self.path, '', ''))
+        url = urlunsplit((scheme, host, self.path, '', ''))
         headers = tornado.httputil.HTTPHeaders()
         for (k,v) in self.headers:
             headers.add(k, v)

@@ -78,6 +78,9 @@ import mimetools
 import tornado.httpclient
 import tornado.httputil
 
+
+tornado.httpclient.AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
+
 class AsyncHTTPConnection(object):
     """
     a wrapper class to tornado.httpclient.AsyncHTTPClient

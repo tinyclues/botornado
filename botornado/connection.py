@@ -116,7 +116,7 @@ class AsyncHTTPConnection(object):
         url = urlunsplit((scheme, host, self.path, '', ''))
         headers = tornado.httputil.HTTPHeaders()
         for (k,v) in self.headers:
-            headers.add(k, v)
+            headers.add(k, str(v))
         request = tornado.httpclient.HTTPRequest(
             url, method=self.method, headers=headers, body=self.body,
             connect_timeout=self.timeout, request_timeout=self.timeout,
